@@ -17,12 +17,12 @@
 
 ### 패키지 설치
 1. [PyMySQL](https://github.com/PyMySQL/PyMySQL)
-2. [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/)
+2. [BeautifulSoup 4](https://www.crummy.com/software/BeautifulSoup/)
 
 ## 사용법
 
 ### 파이썬 스크립트 수정
-- DB 기본설정은 host: localhost, DB: market_data, table: stock_daily 
+- DB 기본설정은 host: localhost, DB: market_data, table: stock_daily
 - 필요 시 스크립트에서 수정
 
 ### DB 테이블 생성
@@ -52,7 +52,7 @@ CREATE TABLE stock_daily (
 ### 파이썬 스크립트 실행
 
 - python 3으로 import_stock.py 실행한 후 페이지수, MySQL 사용자 ID와 암호 입력
-- 페이지수는 네이버 금융의 일별시세 중 최대 몇 페이지의 데이터를 가져올지를 결정함
+- 페이지수는 네이버 증의 일별시세 중 최대 몇 페이지의 데이터를 가져올지를 결정함
 
 ### 기타
 
