@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 import pymysql
 import csv
 import datetime
+import getpass
 
 # From Naver Finance
 def stock_naver(curs, num_page, exchange):
@@ -66,7 +67,7 @@ def main():
 
     # MySQL Connection 
     user_mysql = input("MySQL user: ") 
-    password_mysql = input("MySQL password: ") 
+    password_mysql = getpass.getpass("MySQL password: ")
     conn = pymysql.connect(host='localhost', user=user_mysql, password=password_mysql,
                            db='market_data', charset='utf8')
 
