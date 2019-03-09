@@ -10,6 +10,7 @@
 - import_stock.py: 파이썬 스크립트
 - kospi.csv: 한국거래소의 KOSPI 종목 정보
 - kosdaq.csv: 한국거래소의 KOSDAQ 종목 정보
+- 종목 정보는 http://kind.krx.co.kr/corpgeneral/corpList.do?method=loadInitPage 로부터
 
 ## 요구사항
 

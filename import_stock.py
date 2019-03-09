@@ -37,7 +37,7 @@ def stock_naver(curs, num_page, exchange):
                 srlists=source.find_all("tr") 
                 isCheckNone = None
 
-                time.sleep(1)
+                time.sleep(2)
 
                 for i in range(1,len(srlists)-1): 
                     if(srlists[i].span != isCheckNone):
