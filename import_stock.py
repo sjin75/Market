@@ -1,6 +1,7 @@
 
 # Scraping Stock Prices
 
+import sys
 import urllib
 import time
 from urllib.request import urlopen
@@ -10,53 +11,41 @@ import csv
 import datetime
 import getpass
 
+
 # From Naver Finance
-def stock_naver(curs, num_page, exchange):
+def stock_naver(curs, num_page, code):
 
-    if exchange == 'KS':
-        stock_code = open('kospi.csv', 'r')
-    elif exchange == 'KQ':
-        stock_code = open('kosdaq.csv', 'r')
-    else:
-        return
+    records = []
 
-    csvReader = csv.reader(stock_code)
+    try:
 
-    next(csvReader) 
-    for st in csvReader:
-        code = st[0] + '.' + exchange
-        print(code,st[1]) # Stock Codes
-        records = []
+        for page in range(1, num_page+1):
+            url = 'http://finance.naver.com/item/sise_day.nhn?code=' + code.split('.')[0] +'&page='+ str(page)
+            html = urlopen(url)
+            source = BeautifulSoup(html.read(), "html.parser")
+            srlists=source.find_all("tr") 
+            isCheckNone = None
 
-        try:
+            time.sleep(2)
 
-            for page in range(1, num_page+1):
-                url = 'http://finance.naver.com/item/sise_day.nhn?code=' + st[0] +'&page='+ str(page)
-                html = urlopen(url)
-                source = BeautifulSoup(html.read(), "html.parser")
-                srlists=source.find_all("tr") 
-                isCheckNone = None
+            for i in range(1,len(srlists)-1): 
+                if(srlists[i].span != isCheckNone):
+                    records.append(dict(date=srlists[i].find_all("td",align="center")[0].text.replace('.','-'), 
+                                        Close=int(srlists[i].find_all("td",class_="num")[0].text.replace(',', '')), 
+                                        High=int(srlists[i].find_all("td",class_="num")[3].text.replace(',', '')), 
+                                        Low=int(srlists[i].find_all("td",class_="num")[4].text.replace(',', '')), 
+                                        Volume=int(srlists[i].find_all("td",class_="num")[5].text.replace(',', ''))))
 
-                time.sleep(2)
+        # INSERT
+        for record in records:
+            sql = "INSERT INTO stock_daily (dt, StockCode, High, Low, Close, Volume) VALUES ('%s', '%s', %s, %s, %s, %s) \
+                   ON DUPLICATE KEY UPDATE High=%s, Low=%s, Close=%s, Volume=%s" \
+                  %  (record['date'], code, record['High'], record['Low'], record['Close'], record['Volume'], \
+                      record['High'], record['Low'], record['Close'], record['Volume'])
+            curs.execute(sql)
 
-                for i in range(1,len(srlists)-1): 
-                    if(srlists[i].span != isCheckNone):
-                        records.append(dict(date=srlists[i].find_all("td",align="center")[0].text.replace('.','-'), 
-                                            Close=int(srlists[i].find_all("td",class_="num")[0].text.replace(',', '')), 
-                                            High=int(srlists[i].find_all("td",class_="num")[3].text.replace(',', '')), 
-                                            Low=int(srlists[i].find_all("td",class_="num")[4].text.replace(',', '')), 
-                                            Volume=int(srlists[i].find_all("td",class_="num")[5].text.replace(',', ''))))
-
-            # INSERT
-            for record in records:
-                sql = "INSERT INTO stock_daily (dt, StockCode, High, Low, Close, Volume) VALUES ('%s', '%s', %s, %s, %s, %s) \
-                       ON DUPLICATE KEY UPDATE High=%s, Low=%s, Close=%s, Volume=%s" \
-                      %  (record['date'], code, record['High'], record['Low'], record['Close'], record['Volume'], \
-                          record['High'], record['Low'], record['Close'], record['Volume'])
-                curs.execute(sql)
-
-        except:
-            pass
+    except:
+        pass
 
 
 def main():
@@ -85,11 +74,42 @@ def main():
     # Cursor 
     curs = conn.cursor()
 
-    # import KOSPI
-    stock_naver(curs, num_page, 'KS')
+    if len(sys.argv) == 2:
 
-    # import KOSDAQ
-    stock_naver(curs, num_page, 'KQ')
+        code = sys.argv[1]
+        print(f'code = {code}') # Stock Codes
+
+        stock_naver(curs, num_page, code)
+
+    else:
+
+        # import KOSPI
+        stock_code = open('kospi.csv', 'r')
+        exchange = 'KS'
+
+        csvReader = csv.reader(stock_code)
+        next(csvReader) 
+
+        for st in csvReader:
+
+            code = st[0] + '.' + exchange
+            print(code, st[1]) # Stock Codes
+
+            stock_naver(curs, num_page, code)
+
+        # import KOSDAQ
+        stock_code = open('kosdaq.csv', 'r')
+        exchange = 'KQ'
+
+        csvReader = csv.reader(stock_code)
+        next(csvReader) 
+
+        for st in csvReader:
+
+            code = st[0] + '.' + exchange
+            print(code, st[1]) # Stock Codes
+
+            stock_naver(curs, num_page, code)
 
     # Commit
     conn.commit()
@@ -97,6 +117,6 @@ def main():
     # Close
     conn.close()
 
+
 if __name__ == '__main__':
     main()
-
