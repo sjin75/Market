@@ -4,7 +4,7 @@
 import sys
 import urllib
 import time
-from urllib.request import urlopen
+import requests
 from bs4 import BeautifulSoup
 import pymysql
 import csv
@@ -20,15 +20,17 @@ def stock_naver(curs, num_page, code):
     try:
 
         for page in range(1, num_page+1):
-            url = 'http://finance.naver.com/item/sise_day.nhn?code=' + code.split('.')[0] +'&page='+ str(page)
-            html = urlopen(url)
-            source = BeautifulSoup(html.read(), "html.parser")
-            srlists=source.find_all("tr") 
+            url = 'https://finance.naver.com/item/sise_day.nhn?code=' + code.split('.')[0] +'&page='+ str(page)
+            headers = {'User-agent': 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:85.0) Gecko/20100101 Firefox/85.0'}
+            response = requests.get(url, headers=headers)
+            source = BeautifulSoup(response.content, "html.parser")
+            srlists = source.find_all("tr") 
             isCheckNone = None
 
-            time.sleep(2)
+            time.sleep(1.5)
 
             for i in range(1,len(srlists)-1): 
+
                 if(srlists[i].span != isCheckNone):
                     records.append(dict(date=srlists[i].find_all("td",align="center")[0].text.replace('.','-'), 
                                         Close=int(srlists[i].find_all("td",class_="num")[0].text.replace(',', '')), 
