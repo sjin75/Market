@@ -94,7 +94,7 @@ def main():
 
         for st in csvReader:
 
-            code = st[0] + '.' + exchange
+            code = st[0].zfill(6) + '.' + exchange
             print(code, st[1]) # Stock Codes
 
             stock_naver(curs, num_page, code)
@@ -108,7 +108,7 @@ def main():
 
         for st in csvReader:
 
-            code = st[0] + '.' + exchange
+            code = st[0].zfill(6) + '.' + exchange
             print(code, st[1]) # Stock Codes
 
             stock_naver(curs, num_page, code)
